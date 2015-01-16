@@ -1,6 +1,6 @@
 {
   "name": "phpstorm-exclude",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command line utility to exclude directories from PhpStorm projects",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/dragulceo/phpstorm-exclude/issues"
   },
-  "homepage": "https://github.com/dragulceo/phpstorm-exclude"
+  "homepage": "https://github.com/dragulceo/phpstorm-exclude",
+  "bin": {
+    "phpstorm-exclude": "index.js"
+  }
 }
