@@ -1,16 +1,14 @@
 {
   "name": "phpstorm-exclude",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Command line utility to exclude directories from PhpStorm projects",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
   },
   "keywords": [
     "PhpStorm",
     "exclude",
     "exclude",
-    "directory",
     "directory"
   ],
   "author": "dragulceo, geecu",
@@ -19,5 +17,14 @@
     "cli": "^0.6.5",
     "glob": "^4.3.5",
     "lodash.template": "^2.4.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dragulceo/phpstorm-exclude.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dragulceo/phpstorm-exclude/issues"
+  },
+  "homepage": "https://github.com/dragulceo/phpstorm-exclude"
 }
