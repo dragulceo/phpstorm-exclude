@@ -10,7 +10,7 @@ var FILENAME_DEFAULT_EXCLUDE_FILE = __dirname + '/default.iml';
 var TOKEN_PATH_TEMPLATE = '<excludeFolder url="file://$MODULE_DIR$/<%= path %>" />\n';
 
 cli.parse({
-  'project-path': ['p', 'Project path', 'path', __dirname]
+  'project-path': ['p', 'Project path', 'path', process.cwd()]
 });
 
 function search(path, callback, options) {
