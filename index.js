@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
 var template = require('lodash.template');
 var cli = require('cli');
