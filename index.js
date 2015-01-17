@@ -26,33 +26,43 @@ function writeBaseExcludeFile(filename) {
   fs.writeFileSync(filename, getDefaultFileContents());
 }
 
+function getJSONFromXML(xml, callback) {
+  xml2js.parseString(xml, function(err, result) {
+    if (err) {
+      cli.error(err.message);
+    } else {
+      callback(result);
+    }
+  });
+}
+
+function patchWithDefaultStructure(json, callback) {
+  getJSONFromXML(getDefaultFileContents(), function(resultDefault) {
+    callback(deepExtend(resultDefault, json));
+  });
+}
+
+function getXMLFromJSON(json) {
+  var builder = new xml2js.Builder();
+  return builder.buildObject(json);
+}
+
 function appendPathsToExcludeFile(filename, paths) {
   var fileContents = fs.readFileSync(filename, 'utf8');
-  xml2js.parseString(fileContents, function(err, result) {
-    var builder, defaultStructure;
-    if (!err) {
-      defaultStructure = getDefaultFileContents();
-      xml2js.parseString(defaultStructure, function(err, resultDefault) {
-        if (!err) {
-          result = deepExtend(resultDefault, result);
-          paths.forEach(function(path) {
-            if(!result.module.component[0].content[0].excludeFolder) {
-              result.module.component[0].content[0].excludeFolder = [];
-            }
-            result.module.component[0].content[0].excludeFolder.push({
-              '$': {
-                'url': 'file://$MODULE_DIR$/' + path
-              }
-            });
-          });
-          builder = new xml2js.Builder();
-          fileContents = builder.buildObject(result);
-          fs.writeFileSync(filename, fileContents);
+  getJSONFromXML(fileContents, function(json) {
+    patchWithDefaultStructure(json, function(patchedJson) {
+      paths.forEach(function(path) {
+        if (!patchedJson.module.component[0].content[0].excludeFolder) {
+          patchedJson.module.component[0].content[0].excludeFolder = [];
         }
+        patchedJson.module.component[0].content[0].excludeFolder.push({
+          '$': {
+            'url': 'file://$MODULE_DIR$/' + path
+          }
+        });
       });
-    } else {
-      cli.error(err.message);
-    }
+      fs.writeFileSync(filename, getXMLFromJSON(patchedJson));
+    });
   });
 }
 
