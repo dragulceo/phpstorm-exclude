@@ -12,7 +12,7 @@ cli.parse({
   'project-path': ['p', 'Project path', 'path', process.cwd()]
 });
 
-function search(path, callback, options) {
+function pathExists(path, callback, options) {
   return fs.exists(path, function fsExists(exists) {
     return callback(exists, path, options);
   });
@@ -73,7 +73,7 @@ function handleExcludeFileSearch(result, filename, options) {
 function handleProjectSettingsPathSearch(result, path, options) {
   var projectName = process.cwd().split("/").pop();
   if (result) {
-    search(path + '/' + getExcludeFilenameForProject(projectName), handleExcludeFileSearch, options);
+    pathExists(path + '/' + getExcludeFilenameForProject(projectName), handleExcludeFileSearch, options);
   } else {
     cli.error(path + ' not found');
   }
@@ -81,7 +81,7 @@ function handleProjectSettingsPathSearch(result, path, options) {
 
 function handleProjectPathSearch(exists, path, options) {
   if (exists) {
-    search(path + '/.idea', handleProjectSettingsPathSearch, options);
+    pathExists(path + '/.idea', handleProjectSettingsPathSearch, options);
   } else {
     cli.error('Path not found');
   }
@@ -89,5 +89,5 @@ function handleProjectPathSearch(exists, path, options) {
 
 cli.main(function(args, options) {
   options.args = args;
-  return search(options['project-path'], handleProjectPathSearch, options);
+  return pathExists(options['project-path'], handleProjectPathSearch, options);
 });
