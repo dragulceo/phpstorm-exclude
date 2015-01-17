@@ -18,54 +18,38 @@ function search(path, callback, options) {
   });
 }
 
+function getDefaultFileContents() {
+  return fs.readFileSync(FILENAME_DEFAULT_EXCLUDE_FILE, 'utf8');
+}
+
 function writeBaseExcludeFile(filename) {
-  fs.writeFileSync(filename, fs.readFileSync(FILENAME_DEFAULT_EXCLUDE_FILE, 'utf8'));
+  fs.writeFileSync(filename, getDefaultFileContents());
 }
 
 function appendPathsToExcludeFile(filename, paths) {
   var fileContents = fs.readFileSync(filename, 'utf8');
   xml2js.parseString(fileContents, function(err, result) {
-    var builder;
+    var builder, defaultStructure;
     if (!err) {
-      result = deepExtend({
-        'module': {
-          '$': {
-            'type': 'WEB_MODULE',
-            'version': '4'
-          },
-          'component': [{
-            '$': {
-              'url': 'NewModuleRootManager',
-            },
-            'content': [{
+      defaultStructure = getDefaultFileContents();
+      xml2js.parseString(defaultStructure, function(err, resultDefault) {
+        if (!err) {
+          result = deepExtend(resultDefault, result);
+          paths.forEach(function(path) {
+            if(!result.module.component[0].content[0].excludeFolder) {
+              result.module.component[0].content[0].excludeFolder = [];
+            }
+            result.module.component[0].content[0].excludeFolder.push({
               '$': {
-                'url': 'file://$MODULE_DIR$'
-              },
-              'excludeFolder': [],
-            }],
-            'orderEntry': [{
-              '$': {
-                'type': 'inheritedJdk'
+                'url': 'file://$MODULE_DIR$/' + path
               }
-            }, {
-              '$': {
-                'type': 'sourceFolder',
-                'forTests': false
-              }
-            }]
-          }]
+            });
+          });
+          builder = new xml2js.Builder();
+          fileContents = builder.buildObject(result);
+          fs.writeFileSync(filename, fileContents);
         }
-      }, result);
-      paths.forEach(function(path) {
-        result.module.component[0].content[0].excludeFolder.push({
-          '$': {
-            'url': 'file://$MODULE_DIR$/' + path
-          }
-        });
       });
-      builder = new xml2js.Builder();
-      fileContents = builder.buildObject(result);
-      fs.writeFileSync(filename, fileContents);
     } else {
       cli.error(err.message);
     }
