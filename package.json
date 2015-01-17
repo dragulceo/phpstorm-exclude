@@ -3,8 +3,7 @@
   "version": "1.0.3",
   "description": "Command line utility to exclude directories from PhpStorm projects",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [
     "PhpStorm",
     "exclude",
@@ -15,8 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "cli": "^0.6.5",
+    "deep-extend": "^0.3.2",
     "glob": "^4.3.5",
-    "lodash.template": "^2.4.1"
+    "xml2js": "^0.4.4"
   },
   "devDependencies": {},
   "repository": {

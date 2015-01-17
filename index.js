@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-var template = require('lodash.template');
+var xml2js = require('xml2js');
+var deepExtend = require('deep-extend');
 var cli = require('cli');
 cli.enable('glob');
 
-var TOKEN_BEFORE_EXCLUDE = '<content url="file://$MODULE_DIR$">\n';
 var FILENAME_DEFAULT_EXCLUDE_FILE = __dirname + '/default.iml';
-var TOKEN_PATH_TEMPLATE = '<excludeFolder url="file://$MODULE_DIR$/<%= path %>" />\n';
 
 cli.parse({
   'project-path': ['p', 'Project path', 'path', process.cwd()]
@@ -23,26 +22,54 @@ function writeBaseExcludeFile(filename) {
   fs.writeFileSync(filename, fs.readFileSync(FILENAME_DEFAULT_EXCLUDE_FILE, 'utf8'));
 }
 
-function getExcludeStringForPaths(paths) {
-  var content = '', tpl = template(TOKEN_PATH_TEMPLATE);
-  paths.forEach(function (path) {
-    content += tpl({
-      path: path
-    });
-  });
-  return content;
-}
-
 function appendPathsToExcludeFile(filename, paths) {
-  var fileContents = fs.readFileSync(filename, 'utf8'), splitedFile;
-  if(fileContents.search(TOKEN_BEFORE_EXCLUDE)) {
-    splittedFile = fileContents.split(TOKEN_BEFORE_EXCLUDE);
-    splittedFile[1] = getExcludeStringForPaths(paths) + splittedFile[1];
-    fileContents = splittedFile.join(TOKEN_BEFORE_EXCLUDE);
-    fs.writeFileSync(filename, fileContents);
-  } else {
-    cli.error('Invalid exclude file contents. "' + TOKEN_BEFORE_EXCLUDE + '" not found.');
-  }
+  var fileContents = fs.readFileSync(filename, 'utf8');
+  xml2js.parseString(fileContents, function(err, result) {
+    var builder;
+    if (!err) {
+      result = deepExtend({
+        'module': {
+          '$': {
+            'type': 'WEB_MODULE',
+            'version': '4'
+          },
+          'component': [{
+            '$': {
+              'url': 'NewModuleRootManager',
+            },
+            'content': [{
+              '$': {
+                'url': 'file://$MODULE_DIR$'
+              },
+              'excludeFolder': [],
+              'orderEntry': [{
+                '$': {
+                  'type': 'inheritedJdk'
+                }
+              }, {
+                '$': {
+                  'type': 'sourceFolder',
+                  'forTests': false
+                }
+              }]
+            }]
+          }]
+        }
+      }, result);
+      paths.forEach(function(path) {
+        result.module.component[0].content[0].excludeFolder.push({
+          '$': {
+            'url': 'file://$MODULE_DIR$/' + path
+          }
+        });
+      });
+      builder = new xml2js.Builder();
+      fileContents = builder.buildObject(result);
+      fs.writeFileSync(filename, fileContents);
+    } else {
+      cli.error(err.message);
+    }
+  });
 }
 
 function getExcludeFilenameForProject(projectName) {
@@ -54,7 +81,7 @@ function handleExcludeFileSearch(result, filename, options) {
     cli.info('Exclude file was not found. Created: ' + filename);
     writeBaseExcludeFile(filename);
   }
-  if(options.args && Array.isArray(options.args)) {
+  if (options.args && Array.isArray(options.args)) {
     appendPathsToExcludeFile(filename, options.args);
   }
 }
