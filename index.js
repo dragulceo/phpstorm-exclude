@@ -42,16 +42,16 @@ function appendPathsToExcludeFile(filename, paths) {
                 'url': 'file://$MODULE_DIR$'
               },
               'excludeFolder': [],
-              'orderEntry': [{
-                '$': {
-                  'type': 'inheritedJdk'
-                }
-              }, {
-                '$': {
-                  'type': 'sourceFolder',
-                  'forTests': false
-                }
-              }]
+            }],
+            'orderEntry': [{
+              '$': {
+                'type': 'inheritedJdk'
+              }
+            }, {
+              '$': {
+                'type': 'sourceFolder',
+                'forTests': false
+              }
             }]
           }]
         }
