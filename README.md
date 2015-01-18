@@ -18,4 +18,6 @@ Options:
 
 ### Example
 
+```
 phpstorm-exclude relative/path/to/exclude another/one
+```
